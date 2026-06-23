@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-label="Gaussian mixture intuition for one pixel over time">
+  <defs>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <marker id="arrow2" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#2e4d56"/>
+    </marker>
+  </defs>
+  <rect width="1100" height="620" fill="#f7f4ef"/>
+  <text x="55" y="58" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="30" font-weight="700" fill="#1d2b2f">수학의 직관: 한 픽셀이 기억하는 여러 '정상값'</text>
+  <text x="55" y="92" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="17" fill="#4b5a60">Gaussian mixture는 복잡한 수식이라기보다, 한 픽셀에 가능한 색 후보들을 여러 개의 부드러운 덩어리로 저장하는 방식이다.</text>
+
+  <rect x="72" y="138" width="595" height="410" rx="8" fill="#ffffff" stroke="#d8cdb7"/>
+  <line x1="132" y1="493" x2="610" y2="493" stroke="#6c7a80" stroke-width="2" marker-end="url(#arrow2)"/>
+  <line x1="132" y1="493" x2="132" y2="185" stroke="#6c7a80" stroke-width="2" marker-end="url(#arrow2)"/>
+  <text x="505" y="528" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="15" fill="#52646b">R value</text>
+  <text x="85" y="194" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="15" fill="#52646b">G value</text>
+
+  <ellipse cx="285" cy="355" rx="95" ry="58" fill="#6fae9b" opacity="0.24" filter="url(#soft)"/>
+  <ellipse cx="285" cy="355" rx="72" ry="40" fill="#6fae9b" opacity="0.42"/>
+  <ellipse cx="455" cy="255" rx="70" ry="44" fill="#d8a24b" opacity="0.22" filter="url(#soft)"/>
+  <ellipse cx="455" cy="255" rx="52" ry="30" fill="#d8a24b" opacity="0.45"/>
+  <ellipse cx="505" cy="410" rx="95" ry="76" fill="#b45b4b" opacity="0.16" filter="url(#soft)"/>
+  <ellipse cx="505" cy="410" rx="70" ry="52" fill="#b45b4b" opacity="0.30"/>
+
+  <g fill="#2f7568">
+    <circle cx="250" cy="362" r="5"/><circle cx="270" cy="340" r="5"/><circle cx="292" cy="352" r="5"/><circle cx="314" cy="372" r="5"/><circle cx="282" cy="382" r="5"/><circle cx="328" cy="345" r="5"/><circle cx="238" cy="332" r="5"/><circle cx="303" cy="325" r="5"/>
+  </g>
+  <g fill="#b97824">
+    <circle cx="432" cy="260" r="5"/><circle cx="458" cy="238" r="5"/><circle cx="475" cy="269" r="5"/><circle cx="443" cy="284" r="5"/><circle cx="490" cy="250" r="5"/>
+  </g>
+  <g fill="#9b3e35">
+    <circle cx="480" cy="392" r="5"/><circle cx="525" cy="420" r="5"/><circle cx="555" cy="385" r="5"/>
+  </g>
+  <circle cx="590" cy="214" r="7" fill="#303030"/>
+  <circle cx="205" cy="250" r="7" fill="#303030"/>
+
+  <text x="205" y="440" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="17" font-weight="700" fill="#2f7568">배경 후보 A</text>
+  <text x="195" y="466" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="14" fill="#52646b">자주 보임 + 좁게 모임</text>
+  <text x="395" y="205" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="17" font-weight="700" fill="#b97824">배경 후보 B</text>
+  <text x="386" y="229" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="14" fill="#52646b">반복 반사/그림자</text>
+  <text x="490" y="500" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="17" font-weight="700" fill="#9b3e35">전경 후보</text>
+  <text x="476" y="526" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="14" fill="#52646b">드물거나 넓게 흩어짐</text>
+
+  <rect x="710" y="138" width="330" height="410" rx="8" fill="#ffffff" stroke="#d8cdb7"/>
+  <text x="738" y="182" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="20" font-weight="700" fill="#1d2b2f">판단 원리</text>
+  <rect x="738" y="220" width="255" height="64" rx="6" fill="#e6f1ee"/>
+  <text x="758" y="248" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="16" font-weight="700" fill="#2f7568">weight</text>
+  <text x="825" y="248" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="15" fill="#38545d">얼마나 자주 보였나</text>
+  <text x="758" y="270" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="13" fill="#52646b">오래 반복될수록 커진다.</text>
+  <rect x="738" y="304" width="255" height="64" rx="6" fill="#fff0da"/>
+  <text x="758" y="332" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="16" font-weight="700" fill="#b97824">variance</text>
+  <text x="845" y="332" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="15" fill="#5e4b30">얼마나 안정적인가</text>
+  <text x="758" y="354" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="13" fill="#52646b">값이 좁게 모일수록 작다.</text>
+  <rect x="738" y="388" width="255" height="84" rx="6" fill="#edf1f2"/>
+  <text x="758" y="418" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="16" font-weight="700" fill="#2e4d56">background score</text>
+  <text x="758" y="444" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="14" fill="#52646b">자주 보이고 안정적인 후보부터</text>
+  <text x="758" y="464" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="14" fill="#52646b">배경 목록에 넣는다.</text>
+  <text x="738" y="515" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="16" font-weight="700" fill="#a64235">핵심 직관</text>
+  <text x="832" y="515" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="15" fill="#52646b">배경은 하나가 아니라 여러 개일 수 있다.</text>
+</svg>

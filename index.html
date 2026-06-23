@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detailed Seminar Deck - Adaptive Background Mixture Models</title>
+  <style>
+    :root {
+      --paper: #f7f4ef;
+      --ink: #1c2a2f;
+      --muted: #52636a;
+      --line: #d9ccba;
+      --white: #ffffff;
+      --dark: #1f3036;
+      --teal: #2f7568;
+      --teal-soft: #e5f0ed;
+      --rust: #a64235;
+      --rust-soft: #f2ded8;
+      --gold: #b97824;
+      --gold-soft: #fff0da;
+      --blue: #426c8f;
+      --blue-soft: #e5edf4;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      overflow: hidden;
+      background: #11191d;
+      color: var(--ink);
+      font-family: "Malgun Gothic", "Noto Sans KR", Arial, sans-serif;
+    }
+
+    body {
+      user-select: none;
+    }
+
+    .viewport {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stage {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      transform-origin: center center;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 1280px;
+      height: 720px;
+      display: none;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(31, 48, 54, 0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(31, 48, 54, 0.032) 1px, transparent 1px),
+        var(--paper);
+      background-size: 40px 40px, 40px 40px, auto;
+      padding: 48px 58px 42px;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 44px;
+      line-height: 1.13;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 35px;
+      line-height: 1.18;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 22px;
+      line-height: 1.28;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    p,
+    li {
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 1.25em;
+    }
+
+    .eyebrow {
+      color: var(--teal);
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 21px;
+      line-height: 1.55;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .teal {
+      color: var(--teal);
+    }
+
+    .rust {
+      color: var(--rust);
+    }
+
+    .gold {
+      color: var(--gold);
+    }
+
+    .blue {
+      color: var(--blue);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .cols-5 {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .cols-6 {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .split-7-5 {
+      grid-template-columns: 7fr 5fr;
+    }
+
+    .split-6-6 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 16px 40px rgba(31, 48, 54, 0.07);
+    }
+
+    .panel.pad {
+      padding: 24px;
+    }
+
+    .band {
+      background: var(--dark);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    .band .muted {
+      color: #d7e5e2;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tag.teal {
+      color: var(--teal);
+      background: var(--teal-soft);
+      border-color: #bdd8d1;
+    }
+
+    .tag.rust {
+      color: var(--rust);
+      background: var(--rust-soft);
+      border-color: #e3bcb3;
+    }
+
+    .tag.gold {
+      color: var(--gold);
+      background: var(--gold-soft);
+      border-color: #ead0a4;
+    }
+
+    .tag.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-color: #c4d4e1;
+    }
+
+    .big {
+      font-size: 32px;
+      line-height: 1.38;
+      font-weight: 800;
+    }
+
+    .callout {
+      font-size: 27px;
+      line-height: 1.42;
+      font-weight: 800;
+    }
+
+    .equation {
+      font-family: Consolas, "Courier New", monospace;
+      white-space: pre-wrap;
+      background: #18262c;
+      color: #f7fbfb;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 22px;
+      font-size: 21px;
+      line-height: 1.5;
+    }
+
+    .small-equation {
+      font-size: 18px;
+      line-height: 1.48;
+    }
+
+    .step {
+      min-height: 124px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .step-no {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--dark);
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .step-title {
+      font-size: 20px;
+      line-height: 1.28;
+      font-weight: 800;
+    }
+
+    .step-desc {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .metric {
+      padding: 22px;
+      text-align: center;
+      min-height: 132px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 40px;
+      line-height: 1;
+      color: var(--teal);
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .figure-box {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 16px 40px rgba(31, 48, 54, 0.07);
+      padding: 12px;
+    }
+
+    .paper-figure {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .figure-caption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.42;
+      font-weight: 700;
+    }
+
+    .timeline {
+      position: relative;
+      height: 260px;
+      margin-top: 24px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      top: 116px;
+      height: 4px;
+      background: #c9d2d0;
+      border-radius: 99px;
+    }
+
+    .timeline-item {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 8px;
+    }
+
+    .circle {
+      width: 68px;
+      height: 68px;
+      margin: 74px auto 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--teal-soft);
+      color: var(--teal);
+      border: 2px solid #bdd8d1;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 180px 1fr 88px;
+      gap: 14px;
+      align-items: center;
+      margin: 14px 0;
+    }
+
+    .bar-name {
+      font-weight: 800;
+      font-size: 17px;
+    }
+
+    .bar-track {
+      height: 30px;
+      border-radius: 6px;
+      background: #dfe6e3;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: var(--teal);
+    }
+
+    .bar-fill.gold-bg {
+      background: var(--gold);
+    }
+
+    .bar-fill.rust-bg {
+      background: var(--rust);
+    }
+
+    .bar-fill.blue-bg {
+      background: var(--blue);
+    }
+
+    .status-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      line-height: 1.42;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    .status-table th,
+    .status-table td {
+      border: 1px solid var(--line);
+      padding: 13px 14px;
+      text-align: left;
+      vertical-align: top;
+      background: rgba(255, 255, 255, 0.84);
+    }
+
+    .status-table th {
+      color: var(--dark);
+      background: #ebe5da;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .cluster {
+      position: relative;
+      height: 390px;
+      overflow: hidden;
+    }
+
+    .axis-x,
+    .axis-y {
+      position: absolute;
+      background: #aebbb8;
+    }
+
+    .axis-x {
+      left: 70px;
+      right: 44px;
+      bottom: 54px;
+      height: 2px;
+    }
+
+    .axis-y {
+      left: 70px;
+      top: 42px;
+      bottom: 54px;
+      width: 2px;
+    }
+
+    .ellipse {
+      position: absolute;
+      border-radius: 50%;
+      border: 22px solid rgba(47, 117, 104, 0.16);
+      background: rgba(47, 117, 104, 0.18);
+    }
+
+    .ellipse.gold-bg {
+      border-color: rgba(185, 120, 36, 0.17);
+      background: rgba(185, 120, 36, 0.17);
+    }
+
+    .ellipse.rust-bg {
+      border-color: rgba(166, 66, 53, 0.13);
+      background: rgba(166, 66, 53, 0.13);
+    }
+
+    .dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--ink);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+    }
+
+    .pixel-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 25px);
+      grid-template-rows: repeat(8, 25px);
+      gap: 7px;
+    }
+
+    .px {
+      border-radius: 5px;
+      background: #dbe4e1;
+      border: 1px solid rgba(31, 48, 54, 0.06);
+    }
+
+    .px.t1 { background: rgba(47, 117, 104, 0.72); }
+    .px.t2 { background: rgba(47, 117, 104, 0.38); }
+    .px.g1 { background: rgba(185, 120, 36, 0.70); }
+    .px.g2 { background: rgba(185, 120, 36, 0.35); }
+    .px.r1 { background: rgba(166, 66, 53, 0.70); }
+    .px.r2 { background: rgba(166, 66, 53, 0.34); }
+    .px.b1 { background: rgba(66, 108, 143, 0.70); }
+    .px.b2 { background: rgba(66, 108, 143, 0.34); }
+
+    .slider {
+      height: 8px;
+      background: #d8dedc;
+      border-radius: 99px;
+      position: relative;
+      margin: 18px 0 13px;
+    }
+
+    .slider::after {
+      content: "";
+      position: absolute;
+      top: -7px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--teal);
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(31, 48, 54, 0.25);
+    }
+
+    .slider.low::after { left: 24%; }
+    .slider.mid::after { left: 48%; }
+    .slider.high::after { left: 68%; }
+    .slider.warn::after { left: 82%; background: var(--rust); }
+
+    .footer {
+      position: absolute;
+      left: 58px;
+      right: 58px;
+      bottom: 24px;
+      color: rgba(82, 99, 106, 0.9);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 3;
+    }
+
+    .counter,
+    .hint {
+      position: fixed;
+      z-index: 30;
+      bottom: 18px;
+      color: rgba(217, 232, 228, 0.84);
+      background: rgba(17, 25, 29, 0.68);
+      border: 1px solid rgba(217, 232, 228, 0.20);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .counter {
+      right: 18px;
+    }
+
+    .hint {
+      left: 18px;
+    }
+
+    .notes {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      width: 760px;
+      max-height: 180px;
+      transform: translateX(-50%);
+      overflow: auto;
+      display: none;
+      z-index: 32;
+      padding: 14px 16px;
+      color: #edf5f3;
+      background: rgba(17, 25, 29, 0.92);
+      border: 1px solid rgba(217, 232, 228, 0.20);
+      border-radius: 8px;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .notes.visible {
+      display: block;
+    }
+
+    .speaker-notes {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    <div class="stage" id="stage">
+      <section class="slide active" data-title="논문 및 발표자 정보">
+        <div class="content grid split-7-5" style="align-items: center;">
+          <div>
+            <div class="eyebrow">Paper Seminar</div>
+            <h1>Adaptive Background Mixture Models for Real-Time Tracking</h1>
+            <p class="sub" style="margin-top: 24px;">Chris Stauffer & W. E. L. Grimson</p>
+            <div style="display: flex; gap: 10px; margin-top: 42px;">
+              <span class="tag teal">Background Modeling</span>
+              <span class="tag gold">Gaussian Mixture</span>
+              <span class="tag blue">Real-Time Tracking</span>
+            </div>
+            <div class="band" style="margin-top: 48px;">
+              <p class="callout">배경 제거를 “차영상”이 아니라 “시간 속에서 유지되는 배경 기억”의 문제로 바꾼 고전적 시스템 논문</p>
+            </div>
+          </div>
+          <div class="panel pad">
+            <h3>발표 정보</h3>
+            <div class="grid" style="margin-top: 26px; gap: 26px;">
+              <div><p class="muted">발표자</p><p class="big">박천웅</p></div>
+              <div><p class="muted">소속</p><p class="big">IRV-Lab</p></div>
+              <div><p class="muted">발표일</p><p class="big">2026.06.24</p></div>
+            </div>
+          </div>
+        </div>
+        <aside class="speaker-notes">오늘 발표할 논문은 Stauffer와 Grimson의 Adaptive Background Mixture Models for Real-Time Tracking입니다. 이 발표에서는 수식 자체보다, 왜 배경을 분포로 기억해야 했는지와 그 판단이 어떤 온라인 업데이트로 구현되는지를 중심으로 보겠습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="발표 로드맵">
+        <div class="content">
+          <div class="eyebrow">Roadmap</div>
+          <h2>오늘 발표는 문제 정의보다 “모델이 실제로 어떻게 굴러가는가”에 무게를 둔다</h2>
+          <div class="grid cols-4" style="margin-top: 42px;">
+            <div class="panel step"><span class="step-no">1</span><div><div class="step-title">문제 재정의</div><div class="step-desc">배경은 왜 고정 이미지가 아닌가</div></div></div>
+            <div class="panel step"><span class="step-no">2</span><div><div class="step-title">GMM 모델</div><div class="step-desc">한 픽셀의 여러 정상 상태를 어떻게 저장하는가</div></div></div>
+            <div class="panel step"><span class="step-no">3</span><div><div class="step-title">온라인 업데이트</div><div class="step-desc">match, weight, mean, variance, replacement</div></div></div>
+            <div class="panel step"><span class="step-no">4</span><div><div class="step-title">결과와 한계</div><div class="step-desc">장기 운용 증거와 현대적 비판</div></div></div>
+          </div>
+          <div class="band" style="margin-top: 52px;">
+            <p class="callout">핵심 질문: 변화하는 현실 배경을 계속 학습하면서, 새로 들어온 객체만 전경으로 분리할 수 있는가?</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">발표는 문제 정의에서 출발해 GMM 모델, 온라인 업데이트, 배경 선택, 결과와 한계 순서로 진행합니다. 알고리즘의 세부 판단 단계를 분리해서 설명하겠습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="핵심 관점">
+        <div class="content grid split-7-5" style="align-items: center;">
+          <div>
+            <div class="eyebrow">Core Viewpoint</div>
+            <h2>배경은 한 장의 이미지가 아니다</h2>
+            <p class="big teal" style="margin-top: 34px;">각 픽셀이 시간 속에서 반복해서 보이는 여러 상태의 집합이다.</p>
+            <div class="grid cols-2" style="margin-top: 38px;">
+              <div class="panel pad"><h3>표면 질문</h3><p class="muted" style="margin-top: 12px;">현재 프레임에서 어디가 움직였는가?</p></div>
+              <div class="panel pad"><h3>논문의 질문</h3><p class="muted" style="margin-top: 12px;">이 픽셀은 장기적으로 무엇을 배경으로 기억해야 하는가?</p></div>
+            </div>
+          </div>
+          <div class="panel pad" style="display: flex; justify-content: center;">
+            <div class="pixel-grid">
+              <span class="px"></span><span class="px t2"></span><span class="px"></span><span class="px"></span><span class="px g2"></span><span class="px"></span><span class="px"></span><span class="px b2"></span><span class="px"></span><span class="px"></span><span class="px r2"></span><span class="px"></span>
+              <span class="px"></span><span class="px t1"></span><span class="px t2"></span><span class="px"></span><span class="px g1"></span><span class="px g2"></span><span class="px"></span><span class="px b1"></span><span class="px b2"></span><span class="px"></span><span class="px r1"></span><span class="px r2"></span>
+              <span class="px"></span><span class="px t2"></span><span class="px t1"></span><span class="px t2"></span><span class="px"></span><span class="px g1"></span><span class="px g2"></span><span class="px"></span><span class="px b1"></span><span class="px b2"></span><span class="px"></span><span class="px r1"></span>
+              <span class="px"></span><span class="px"></span><span class="px t2"></span><span class="px t1"></span><span class="px t2"></span><span class="px"></span><span class="px g1"></span><span class="px g2"></span><span class="px"></span><span class="px b1"></span><span class="px b2"></span><span class="px"></span>
+              <span class="px"></span><span class="px"></span><span class="px"></span><span class="px t2"></span><span class="px t1"></span><span class="px"></span><span class="px"></span><span class="px g1"></span><span class="px g2"></span><span class="px"></span><span class="px b2"></span><span class="px"></span>
+              <span class="px b2"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px t2"></span><span class="px t1"></span><span class="px"></span><span class="px"></span><span class="px g1"></span><span class="px g2"></span><span class="px"></span><span class="px"></span>
+              <span class="px b1"></span><span class="px b2"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px t2"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px g1"></span><span class="px g2"></span><span class="px"></span>
+              <span class="px"></span><span class="px b1"></span><span class="px b2"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px"></span><span class="px g2"></span><span class="px"></span>
+            </div>
+          </div>
+          <div class="footer"><span>전환: background subtraction → online background modeling</span><span>핵심: 픽셀별 시간 이력</span></div>
+        </div>
+        <aside class="speaker-notes">이 논문을 한 문장으로 말하면 배경은 고정 이미지가 아니라 시간 속에서 반복되는 픽셀 상태의 집합이라는 것입니다. 따라서 전경 탐지보다 앞선 문제는 배경 기억의 유지와 갱신입니다.</aside>
+      </section>
+
+      <section class="slide" data-title="단순 차영상의 실패">
+        <div class="content">
+          <div class="eyebrow">Naive Background Subtraction</div>
+          <h2>“현재 프레임 - 배경 이미지”는 왜 금방 깨지는가</h2>
+          <div class="grid cols-3" style="margin-top: 42px;">
+            <div class="panel pad"><h3>1. 고정 배경 저장</h3><p class="muted" style="margin-top: 14px;">처음의 빈 장면을 기준으로 둔다.</p><p class="rust" style="margin-top: 18px; font-weight: 800;">초기화 이후 장면 변화가 누적되면 기준 자체가 낡는다.</p></div>
+            <div class="panel pad"><h3>2. 전역 threshold</h3><p class="muted" style="margin-top: 14px;">모든 픽셀에 같은 차이 기준을 적용한다.</p><p class="rust" style="margin-top: 18px; font-weight: 800;">밝은 영역, 어두운 영역, 흔들리는 영역이 같은 기준을 강요받는다.</p></div>
+            <div class="panel pad"><h3>3. 움직임 = 전경</h3><p class="muted" style="margin-top: 14px;">차이가 크면 전경이라고 본다.</p><p class="rust" style="margin-top: 18px; font-weight: 800;">나뭇잎, 물결, 반사처럼 움직이는 배경을 전경으로 오판한다.</p></div>
+          </div>
+          <div class="band" style="margin-top: 42px;">
+            <p class="callout">문제는 “움직임 찾기”가 아니라, 변하는 장면에서 무엇을 정상적인 배경 상태로 인정할지다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">차영상은 직관적이지만 실제 감시 환경에서는 배경 자체가 계속 변합니다. 그래서 논문은 움직임의 위치보다 배경의 시간적 모델링을 먼저 문제 삼습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="시대적 압력">
+        <div class="content">
+          <div class="eyebrow">Historical Pressure</div>
+          <h2>장시간 실시간 감시 시스템이 요구한 조건</h2>
+          <div class="timeline grid cols-4">
+            <div class="timeline-item"><div class="circle">1</div><h3>짧은 실험 영상</h3><p class="muted">통제된 조건</p></div>
+            <div class="timeline-item"><div class="circle">2</div><h3>고정 배경</h3><p class="muted">초기화 의존</p></div>
+            <div class="timeline-item"><div class="circle">3</div><h3>실외 카메라</h3><p class="muted">날씨와 시간 변화</p></div>
+            <div class="timeline-item"><div class="circle">4</div><h3>적응형 모델</h3><p class="muted">무인 장기 운용</p></div>
+          </div>
+          <div class="grid cols-4" style="margin-top: 28px;">
+            <div class="panel pad"><h3>Real-time</h3><p class="muted" style="margin-top: 10px;">매 프레임마다 빠른 판단</p></div>
+            <div class="panel pad"><h3>Long-term</h3><p class="muted" style="margin-top: 10px;">몇 시간, 몇 달 동안 유지</p></div>
+            <div class="panel pad"><h3>Outdoor</h3><p class="muted" style="margin-top: 10px;">조명, 날씨, 반복 움직임</p></div>
+            <div class="panel pad"><h3>Unsupervised</h3><p class="muted" style="margin-top: 10px;">사람 개입 없는 적응</p></div>
+          </div>
+        </div>
+        <aside class="speaker-notes">1990년대 말에는 실시간 영상 처리가 가능해지면서 짧고 통제된 실험보다 장기간 실외 운용이 중요한 문제가 되었습니다. 이 조건에서 배경 모델은 한 번 만든 이미지가 아니라 계속 유지되는 시스템 상태가 되어야 합니다.</aside>
+      </section>
+
+      <section class="slide" data-title="문제 정의">
+        <div class="content">
+          <div class="eyebrow">Problem Definition</div>
+          <h2>시스템은 무엇을 배경으로 기억해야 하는가</h2>
+          <div class="grid cols-5" style="margin-top: 42px;">
+            <div class="panel step"><span class="tag teal">조명</span><p class="step-desc">시간에 따라 천천히 평균이 이동한다.</p></div>
+            <div class="panel step"><span class="tag teal">반복 배경</span><p class="step-desc">나뭇잎, 물결, 깃발은 배경이지만 계속 움직인다.</p></div>
+            <div class="panel step"><span class="tag gold">그림자</span><p class="step-desc">같은 물체와 같은 픽셀에 다른 색을 만든다.</p></div>
+            <div class="panel step"><span class="tag rust">정지 객체</span><p class="step-desc">오래 멈추면 배경처럼 반복 관측된다.</p></div>
+            <div class="panel step"><span class="tag blue">배경 복구</span><p class="step-desc">객체가 사라진 뒤 원래 상태를 되찾아야 한다.</p></div>
+          </div>
+          <div class="band" style="margin-top: 58px;">
+            <p class="callout">각 픽셀이 장기적으로 어떤 값들을 정상적인 배경 상태로 가져야 하는지 실시간으로 학습한다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">논문은 각 픽셀이 하나의 색을 갖는다고 보지 않습니다. 오랜 시간 동안 여러 정상 상태를 오갈 수 있다고 보고, 그것을 배경 모델 안에 저장합니다.</aside>
+      </section>
+
+      <section class="slide" data-title="초기 접근의 한계">
+        <div class="content">
+          <div class="eyebrow">Prior Approaches</div>
+          <h2>단일 배경 가정은 어디서 깨지는가</h2>
+          <table class="status-table" style="margin-top: 36px;">
+            <thead>
+              <tr>
+                <th style="width: 20%;">접근</th>
+                <th style="width: 26%;">무엇을 가정하는가</th>
+                <th style="width: 28%;">잘 되는 상황</th>
+                <th>깨지는 지점</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>비적응 배경</strong></td>
+                <td>초기 빈 장면이 계속 유효하다.</td>
+                <td>조명이 일정하고 장면이 짧다.</td>
+                <td>장시간 운용에서 배경 이미지가 낡는다.</td>
+              </tr>
+              <tr>
+                <td><strong>시간 평균</strong></td>
+                <td>최근 프레임 평균이 배경이다.</td>
+                <td>천천히 변하는 단일 배경.</td>
+                <td>느린 객체가 배경에 섞이고 다봉 배경을 못 다룬다.</td>
+              </tr>
+              <tr>
+                <td><strong>단일 Gaussian</strong></td>
+                <td>한 픽셀은 하나의 평균과 분산으로 충분하다.</td>
+                <td>조명 변화가 완만하고 배경 모드가 하나다.</td>
+                <td>물결, 반사, 나뭇잎처럼 여러 정상 상태를 설명하지 못한다.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="band" style="margin-top: 30px;"><p class="callout">핵심 병목: 한 픽셀의 관측값이 단일 봉우리로 모인다는 가정</p></div>
+        </div>
+        <aside class="speaker-notes">이 슬라이드는 왜 Gaussian mixture가 필요한지의 논리적 다리입니다. 초기 방식들은 모두 배경이 하나의 중심값으로 설명된다는 가정에 기대고 있습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="한 픽셀의 시간 이력">
+        <div class="content grid split-7-5" style="align-items: center;">
+          <div>
+            <div class="eyebrow">Pixel History</div>
+            <h2>픽셀 하나를 독립적인 작은 관찰자로 본다</h2>
+            <div class="equation" style="margin-top: 34px;">{X1, ..., Xt} = { I(x0, y0, i) : 1 <= i <= t }</div>
+            <div class="grid cols-2" style="margin-top: 28px;">
+              <div class="panel pad"><h3>관측값</h3><p class="muted" style="margin-top: 10px;">매 프레임에서 같은 좌표의 RGB 값</p></div>
+              <div class="panel pad"><h3>학습 대상</h3><p class="muted" style="margin-top: 10px;">그 픽셀이 반복해서 보이는 정상 상태들</p></div>
+            </div>
+          </div>
+          <div class="panel pad">
+            <h3>예시: 도로 위 한 픽셀</h3>
+            <ul style="margin-top: 20px;">
+              <li>대부분의 시간: 회색 도로</li>
+              <li>가끔: 그림자로 어두운 도로</li>
+              <li>가끔: 자동차 색</li>
+              <li>비 온 뒤: 반사로 밝은 값</li>
+            </ul>
+            <p class="rust" style="margin-top: 24px; font-weight: 800;">평균 하나로 합치면 어느 상태도 제대로 대표하지 못한다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">논문은 영상 전체를 한 번에 복잡하게 모델링하기보다, 각 픽셀의 시간 이력을 별도로 봅니다. 이 단순화 덕분에 실시간 처리가 가능하지만, 픽셀 독립이라는 한계도 함께 생깁니다.</aside>
+      </section>
+
+      <section class="slide" data-title="GMM 직관">
+        <div class="content grid split-7-5">
+          <div>
+            <div class="eyebrow">GMM Intuition</div>
+            <h2>Figure 2: 한 픽셀의 값은 여러 cluster를 만든다</h2>
+            <div class="figure-box" style="height: 430px; margin-top: 28px;">
+              <img class="paper-figure" src="Figure 2.png" alt="Figure 2: images and scatter plots of red and green values of a single pixel over time">
+            </div>
+            <p class="figure-caption">Figure 2. 같은 픽셀의 red/green 값이 시간에 따라 단일 Gaussian이 아니라 여러 모드로 나타나는 사례.</p>
+          </div>
+          <div style="display: flex; flex-direction: column; justify-content: end; gap: 18px;">
+            <div class="panel pad"><h3>(a) 조명 변화</h3><p class="muted" style="margin-top: 10px;">같은 위치라도 2분 차이로 scatter 위치가 달라진다. 하나의 고정 threshold로는 대응하기 어렵다.</p></div>
+            <div class="panel pad"><h3>(b), (c) 다봉 배경</h3><p class="muted" style="margin-top: 10px;">물 표면 specularity와 monitor flicker가 같은 픽셀에 여러 정상 상태를 만든다.</p></div>
+            <div class="band"><p class="callout">Gaussian mixture는 이 여러 색 덩어리를 동시에 기억하는 방식이다.</p></div>
+          </div>
+        </div>
+        <aside class="speaker-notes">Figure 2는 이 논문의 문제의식을 가장 직접적으로 보여줍니다. 한 픽셀의 색값이 하나의 중심으로 모이지 않고 여러 cluster를 만들기 때문에, 단일 Gaussian이나 고정 threshold만으로는 충분하지 않습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="모델 수식">
+        <div class="content">
+          <div class="eyebrow">Model Equation</div>
+          <h2>현재 픽셀값의 확률을 K개의 Gaussian mixture로 본다</h2>
+          <div class="grid split-7-5" style="margin-top: 36px;">
+            <div>
+              <div class="equation">P(Xt) = sum_i=1^K w_i,t * eta(Xt, mu_i,t, Sigma_i,t)
+
+Sigma_k,t = sigma_k,t^2 * I</div>
+              <div class="band" style="margin-top: 24px;"><p class="callout">모든 픽셀이 자기만의 작은 mixture model을 가진다.</p></div>
+            </div>
+            <div class="grid cols-2">
+              <div class="panel pad"><h3>K</h3><p class="muted" style="margin-top: 10px;">기억할 후보 수. 논문은 메모리와 계산량에 따라 보통 3~5를 사용한다고 설명한다.</p></div>
+              <div class="panel pad"><h3>w</h3><p class="muted" style="margin-top: 10px;">해당 상태가 얼마나 자주 관측되었는가.</p></div>
+              <div class="panel pad"><h3>mu</h3><p class="muted" style="margin-top: 10px;">색 덩어리의 중심값.</p></div>
+              <div class="panel pad"><h3>sigma</h3><p class="muted" style="margin-top: 10px;">그 색 덩어리가 얼마나 흔들리는가.</p></div>
+            </div>
+          </div>
+        </div>
+        <aside class="speaker-notes">이 수식에서 실용적으로 중요한 것은 full covariance를 포기하고 sigma squared I로 단순화한다는 점입니다. RGB 채널 간 상관을 완전히 모델링하지는 않지만, 모든 픽셀에 실시간으로 적용할 수 있는 계산량을 얻습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="매 프레임 처리 루프">
+        <div class="content">
+          <div class="eyebrow">Per-Frame Loop</div>
+          <h2>한 픽셀에 새 값 Xt가 들어오면 무슨 일이 일어나는가</h2>
+          <div class="grid cols-6" style="margin-top: 38px;">
+            <div class="panel step"><span class="step-no">1</span><div><div class="step-title">입력</div><div class="step-desc">현재 픽셀값 Xt</div></div></div>
+            <div class="panel step"><span class="step-no">2</span><div><div class="step-title">비교</div><div class="step-desc">K개 Gaussian과 거리 계산</div></div></div>
+            <div class="panel step"><span class="step-no">3</span><div><div class="step-title">Match</div><div class="step-desc">2.5 sigma 이내인지 검사</div></div></div>
+            <div class="panel step"><span class="step-no">4</span><div><div class="step-title">Update</div><div class="step-desc">w, mu, sigma 갱신</div></div></div>
+            <div class="panel step"><span class="step-no">5</span><div><div class="step-title">Sort</div><div class="step-desc">w / sigma 기준 정렬</div></div></div>
+            <div class="panel step"><span class="step-no">6</span><div><div class="step-title">Classify</div><div class="step-desc">배경 component에 속하는지 판단</div></div></div>
+          </div>
+          <div class="grid split-6-6" style="margin-top: 44px;">
+            <div class="panel pad"><h3>판단</h3><p class="muted" style="margin-top: 12px;">현재 값이 배경인지 전경인지 결정한다.</p></div>
+            <div class="panel pad"><h3>학습</h3><p class="muted" style="margin-top: 12px;">그 결정과 관측값으로 다음 프레임의 배경 기억을 수정한다.</p></div>
+          </div>
+          <div class="footer"><span>이 논문의 실용적 핵심: 정확한 EM 대신 온라인 근사 업데이트</span><span>반복 단위: 모든 픽셀, 모든 프레임</span></div>
+        </div>
+        <aside class="speaker-notes">이 한 장이 알고리즘의 전체 뼈대입니다. 뒤 슬라이드에서는 match criterion, weight update, mean/variance update, replacement, background selection을 각각 분리해서 봅니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Match criterion">
+        <div class="content grid split-6-6">
+          <div>
+            <div class="eyebrow">Step 1. Match Criterion</div>
+            <h2>저장된 Gaussian 중 하나와 충분히 가까운가</h2>
+            <div class="equation" style="margin-top: 34px;">match k if
+
+distance(Xt, mu_k,t-1) <= 2.5 * sigma_k,t-1</div>
+            <div class="band" style="margin-top: 28px;"><p class="callout">전역 threshold가 아니라 component별 local threshold다.</p></div>
+          </div>
+          <div class="panel pad">
+            <h3>왜 local threshold인가</h3>
+            <table class="status-table" style="margin-top: 20px;">
+              <tbody>
+                <tr><td><strong>분산이 작은 상태</strong></td><td>안정적인 배경이므로 좁게 받아들인다.</td></tr>
+                <tr><td><strong>분산이 큰 상태</strong></td><td>흔들리는 배경이므로 넓게 받아들인다.</td></tr>
+                <tr><td><strong>새로운 색</strong></td><td>어떤 후보와도 멀면 새로운 component 후보가 된다.</td></tr>
+              </tbody>
+            </table>
+            <p class="muted" style="margin-top: 20px;">즉, 밝은 영역과 어두운 영역, 안정 영역과 흔들리는 영역이 같은 기준을 쓰지 않는다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">2.5 sigma 기준은 단순하지만 중요한 장치입니다. 이 기준 때문에 픽셀마다, 그리고 component마다 다른 허용 폭을 갖게 됩니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Weight update">
+        <div class="content">
+          <div class="eyebrow">Step 2. Weight Update</div>
+          <h2>자주 match되는 component는 올라가고, 나머지는 내려간다</h2>
+          <div class="grid split-7-5" style="margin-top: 34px;">
+            <div>
+              <div class="equation">w_k,t = (1 - alpha) * w_k,t-1 + alpha * M_k,t
+
+M_k,t = 1 if component k matches Xt
+M_k,t = 0 otherwise</div>
+              <div class="band" style="margin-top: 26px;"><p class="callout">1 / alpha는 기억의 시간 상수처럼 작동한다.</p></div>
+            </div>
+            <div class="panel pad">
+              <h3>해석</h3>
+              <ul style="margin-top: 18px;">
+                <li>match된 component는 weight가 증가한다.</li>
+                <li>match되지 않은 component는 상대적으로 감소한다.</li>
+                <li>이후 weight들은 합이 1이 되도록 정규화된다.</li>
+                <li>alpha가 크면 새 관측이 빠르게 반영된다.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <aside class="speaker-notes">weight는 “얼마나 자주 보였는가”를 담습니다. match가 반복되면 그 component는 배경 후보가 될 가능성이 커지고, 오랫동안 match되지 않으면 중요도가 내려갑니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Mean and variance update">
+        <div class="content">
+          <div class="eyebrow">Step 3. Mean / Variance Update</div>
+          <h2>match된 Gaussian만 중심과 폭을 현재 관측값 쪽으로 조금 이동한다</h2>
+          <div class="grid split-7-5" style="margin-top: 34px;">
+            <div class="equation small-equation">rho = alpha * eta(Xt | mu_k, sigma_k)
+
+mu_k,t = (1 - rho) * mu_k,t-1 + rho * Xt
+
+sigma_k,t^2 = (1 - rho) * sigma_k,t-1^2
+              + rho * (Xt - mu_k,t)^T (Xt - mu_k,t)</div>
+            <div>
+              <div class="panel pad"><h3>mu 업데이트</h3><p class="muted" style="margin-top: 10px;">새 값이 중심 근처에서 반복되면 평균이 서서히 이동한다.</p></div>
+              <div class="panel pad" style="margin-top: 18px;"><h3>sigma 업데이트</h3><p class="muted" style="margin-top: 10px;">값이 넓게 퍼지면 허용 폭이 커지고, 좁게 모이면 안정적인 component가 된다.</p></div>
+              <div class="panel pad" style="margin-top: 18px;"><h3>rho의 의미</h3><p class="muted" style="margin-top: 10px;">현재 값이 해당 Gaussian에서 얼마나 그럴듯한지에 따라 갱신 강도를 조절한다.</p></div>
+            </div>
+          </div>
+        </div>
+        <aside class="speaker-notes">이 슬라이드는 발표에서 너무 깊게 들어갈 필요는 없지만, weight만 바뀌는 것이 아니라 평균과 분산도 온라인으로 이동한다는 점은 분명히 보여주는 게 좋습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="No match replacement">
+        <div class="content">
+          <div class="eyebrow">Step 4. No Match Case</div>
+          <h2>어떤 Gaussian과도 match되지 않으면 새 후보를 만든다</h2>
+          <div class="grid split-6-6" style="margin-top: 38px;">
+            <div class="panel pad">
+              <h3>replacement 규칙</h3>
+              <ol style="margin-top: 18px;">
+                <li>현재 값 Xt가 모든 component와 멀다.</li>
+                <li>가장 덜 probable한 component를 선택한다.</li>
+                <li>그 component의 평균을 Xt로 둔다.</li>
+                <li>분산은 크게, weight는 낮게 초기화한다.</li>
+              </ol>
+            </div>
+            <div class="panel pad">
+              <h3>왜 이렇게 하는가</h3>
+              <ul style="margin-top: 18px;">
+                <li>새로운 반복 상태가 생길 수 있다.</li>
+                <li>하지만 한 번 나타난 값이 바로 배경이 되면 위험하다.</li>
+                <li>낮은 weight로 시작해 반복 관측될 때만 중요해진다.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="band" style="margin-top: 42px;">
+            <p class="callout">정지한 전경 물체는 오래 반복되면 새 Gaussian으로 자라나 배경에 편입될 수 있다. 이것은 적응성이자 한계다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">새 객체가 멈춰 있으면 처음에는 낮은 weight의 새 component로 들어오고, 오래 반복되면 weight가 커집니다. 장기 감시에서는 필요한 성질이지만, 항상 전경으로 남겨야 하는 응용에서는 문제가 됩니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Background selection">
+        <div class="content">
+          <div class="eyebrow">Step 5. Background Selection</div>
+          <h2>자주 보이고 안정적인 component부터 배경으로 선택한다</h2>
+          <div class="grid split-7-5" style="margin-top: 34px;">
+            <div class="panel pad">
+              <div class="bar-row"><div class="bar-name">Component A</div><div class="bar-track"><div class="bar-fill" style="width: 94%;"></div></div><div class="muted">높음</div></div>
+              <div class="bar-row"><div class="bar-name">Component B</div><div class="bar-track"><div class="bar-fill gold-bg" style="width: 72%;"></div></div><div class="muted">중간</div></div>
+              <div class="bar-row"><div class="bar-name">Component C</div><div class="bar-track"><div class="bar-fill blue-bg" style="width: 48%;"></div></div><div class="muted">낮음</div></div>
+              <div class="bar-row"><div class="bar-name">Component D</div><div class="bar-track"><div class="bar-fill rust-bg" style="width: 28%;"></div></div><div class="muted">전경 후보</div></div>
+              <div class="equation small-equation" style="margin-top: 28px;">score_k = w_k / sigma_k
+B = argmin_b (sum_k=1^b w_k > T)</div>
+            </div>
+            <div class="panel pad">
+              <h3>w / sigma의 해석</h3>
+              <ul style="margin-top: 18px;">
+                <li><strong>w</strong>: 얼마나 자주 보였는가</li>
+                <li><strong>sigma</strong>: 얼마나 안정적으로 모였는가</li>
+                <li><strong>w / sigma</strong>: 자주 보이고 안정적인 정도</li>
+              </ul>
+              <p class="rust" style="margin-top: 22px; font-weight: 800;">weight만 크면 흔들리는 전경도 올라올 수 있고, sigma만 작으면 드문 색을 과대평가할 수 있다.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="speaker-notes">논문은 component를 w 나누기 sigma 기준으로 정렬합니다. 이 값은 빈도와 안정성을 동시에 보려는 heuristic입니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Threshold T">
+        <div class="content">
+          <div class="eyebrow">Parameter T</div>
+          <h2>T는 배경의 다양성을 어디까지 인정할지 정한다</h2>
+          <div class="grid cols-3" style="margin-top: 42px;">
+            <div class="panel pad">
+              <h3>T 낮음</h3>
+              <div class="slider low"></div>
+              <p class="muted">가장 강한 배경 모드만 받아들인다.</p>
+              <p class="rust" style="margin-top: 16px; font-weight: 800;">반복 배경을 전경으로 오판할 수 있다.</p>
+            </div>
+            <div class="panel pad">
+              <h3>T 중간</h3>
+              <div class="slider mid"></div>
+              <p class="muted">주요 배경 모드 여러 개를 받아들인다.</p>
+              <p class="teal" style="margin-top: 16px; font-weight: 800;">나뭇잎, 물결, 반사에 더 강해진다.</p>
+            </div>
+            <div class="panel pad">
+              <h3>T 높음</h3>
+              <div class="slider warn"></div>
+              <p class="muted">많은 모드를 배경으로 인정한다.</p>
+              <p class="rust" style="margin-top: 16px; font-weight: 800;">느린 전경이나 그림자까지 배경화될 수 있다.</p>
+            </div>
+          </div>
+          <div class="band" style="margin-top: 42px;"><p class="callout">T는 정확도 파라미터라기보다 “배경이라는 범주를 얼마나 넓게 볼 것인가”의 설계 선택이다.</p></div>
+        </div>
+        <aside class="speaker-notes">T는 배경 후보의 누적 weight가 어느 정도가 될 때까지 상위 component를 선택할지 정합니다. 낮으면 보수적이고 높으면 포괄적입니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Foreground extraction">
+        <div class="content">
+          <div class="eyebrow">Foreground Extraction and Tracking</div>
+          <h2>배경 모델은 tracking을 위한 안정적인 mask를 만든다</h2>
+          <div class="grid cols-6" style="margin-top: 42px;">
+            <div class="panel step"><span class="step-no">1</span><div><div class="step-title">Frame</div><div class="step-desc">현재 영상 입력</div></div></div>
+            <div class="panel step"><span class="step-no">2</span><div><div class="step-title">Pixel GMM</div><div class="step-desc">픽셀별 후보와 비교</div></div></div>
+            <div class="panel step"><span class="step-no">3</span><div><div class="step-title">Background set</div><div class="step-desc">상위 component 선택</div></div></div>
+            <div class="panel step"><span class="step-no">4</span><div><div class="step-title">Mask</div><div class="step-desc">배경에 없으면 전경</div></div></div>
+            <div class="panel step"><span class="step-no">5</span><div><div class="step-title">Components</div><div class="step-desc">two-pass 연결 영역</div></div></div>
+            <div class="panel step"><span class="step-no">6</span><div><div class="step-title">Tracking</div><div class="step-desc">위치와 크기를 시간 연결</div></div></div>
+          </div>
+          <div class="band" style="margin-top: 52px;">
+            <p class="callout">핵심 기여는 tracker 자체보다, tracker가 쓸 수 있을 만큼 안정적인 foreground mask를 실시간으로 만드는 배경 모델이다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">논문에는 multiple hypothesis tracking과 Kalman filter 기반 추적도 나오지만, 세미나에서 핵심은 background modeling이 mask 품질을 안정화한다는 점입니다.</aside>
+      </section>
+
+      <section class="slide" data-title="파라미터 상호작용">
+        <div class="content">
+          <div class="eyebrow">Parameter Trade-Offs</div>
+          <h2>K, alpha, T, 2.5 sigma는 각각 다른 실패를 조절한다</h2>
+          <table class="status-table" style="margin-top: 36px;">
+            <thead>
+              <tr>
+                <th>파라미터</th>
+                <th>의미</th>
+                <th>작게 잡으면</th>
+                <th>크게 잡으면</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>K</strong></td><td>한 픽셀이 기억할 후보 수</td><td>다봉 배경을 놓친다.</td><td>메모리와 계산량 증가.</td></tr>
+              <tr><td><strong>alpha</strong></td><td>적응 속도</td><td>조명 변화에 늦게 따라간다.</td><td>전경을 빠르게 배경으로 흡수한다.</td></tr>
+              <tr><td><strong>T</strong></td><td>배경으로 인정할 누적 weight</td><td>반복 배경을 전경으로 본다.</td><td>전경까지 배경화될 위험이 있다.</td></tr>
+              <tr><td><strong>2.5 sigma</strong></td><td>component별 match 폭</td><td>정상 흔들림도 새 객체처럼 본다.</td><td>다른 색까지 같은 상태로 묶는다.</td></tr>
+            </tbody>
+          </table>
+          <div class="band" style="margin-top: 30px;"><p class="callout">이 파라미터들은 모두 “무엇을 얼마나 오래 배경으로 기억할 것인가”를 조절한다.</p></div>
+        </div>
+        <aside class="speaker-notes">파라미터 설명은 각각의 정의보다 trade-off로 설명하는 편이 발표에 좋습니다. 모두 배경 기억의 시간과 폭을 조절하는 값입니다.</aside>
+      </section>
+
+      <section class="slide" data-title="왜 작동하는가">
+        <div class="content">
+          <div class="eyebrow">Why It Works</div>
+          <h2>세 가지 현실 상황을 한 구조 안에서 처리한다</h2>
+          <div class="grid cols-3" style="margin-top: 42px;">
+            <div class="panel pad">
+              <span class="tag teal">반복 배경</span>
+              <h3 style="margin-top: 20px;">물결, 나뭇잎, 반사</h3>
+              <p class="muted" style="margin-top: 14px;">계속 바뀌지만 반복되는 상태를 여러 component로 보관한다.</p>
+              <p class="teal" style="margin-top: 20px; font-weight: 800;">배경은 하나일 필요가 없다.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag gold">느린 변화</span>
+              <h3 style="margin-top: 20px;">햇빛, 시간대, 날씨</h3>
+              <p class="muted" style="margin-top: 14px;">online update로 평균과 weight가 서서히 이동한다.</p>
+              <p class="teal" style="margin-top: 20px; font-weight: 800;">모델이 장면을 따라간다.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag blue">복구</span>
+              <h3 style="margin-top: 20px;">객체가 사라진 뒤</h3>
+              <p class="muted" style="margin-top: 14px;">원래 배경 component가 낮은 weight로 남아 있으면 다시 올라온다.</p>
+              <p class="teal" style="margin-top: 20px; font-weight: 800;">과거 배경을 완전히 버리지 않는다.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="speaker-notes">이 논문이 강한 이유는 복잡한 의미 이해 없이도 반복 배경, 느린 변화, 배경 복구를 모두 같은 mixture 구조로 설명할 수 있기 때문입니다.</aside>
+      </section>
+
+      <section class="slide" data-title="실험 세팅">
+        <div class="content">
+          <div class="eyebrow">Reported System Evidence</div>
+          <h2>실험 결과는 현대식 benchmark보다 장기 운용 증거에 가깝다</h2>
+          <div class="grid cols-4" style="margin-top: 38px;">
+            <div class="panel metric"><strong>160x120</strong><span>입력 해상도</span></div>
+            <div class="panel metric"><strong>11-13</strong><span>fps on SGI O2 / R10000</span></div>
+            <div class="panel metric"><strong>16개월+</strong><span>다섯 장면 장기 tracking 저장</span></div>
+            <div class="panel metric"><strong>33 / 34</strong><span>10분 장면의 차량 / 사람 추적</span></div>
+          </div>
+          <div class="grid split-6-6" style="margin-top: 38px;">
+            <div class="panel pad"><h3>강조할 점</h3><p class="muted" style="margin-top: 12px;">정확도 순위가 아니라, 당시 하드웨어에서 실외 장면을 장시간 처리했다는 시스템성.</p></div>
+            <div class="panel pad"><h3>주의할 점</h3><p class="muted" style="margin-top: 12px;">공개 데이터셋, precision/recall, ablation, 경쟁 방법 비교는 현대 기준으로 부족하다.</p></div>
+          </div>
+        </div>
+        <aside class="speaker-notes">이 결과를 말할 때는 수치를 단순 나열하지 말고, 당시의 계산 환경에서 장시간 실시간 감시 시스템으로 버텼다는 점을 해석해야 합니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Figure 3">
+        <div class="content grid split-6-6" style="align-items: stretch;">
+          <div>
+            <div class="eyebrow">Figure 3</div>
+            <h2>장시간 tracking 궤적의 일관성</h2>
+            <div class="figure-box" style="height: 500px; margin-top: 26px;">
+              <img class="paper-figure" src="Figure 3.png" alt="Figure 3: consecutive hours of tracking and accumulated tracks">
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; justify-content: end; gap: 18px;">
+            <div class="panel pad">
+              <h3>그림이 보여주는 것</h3>
+              <p class="muted" style="margin-top: 12px;">왼쪽은 저장된 장면 이미지이고, 오른쪽은 시간 동안 누적된 object track이다. 색은 방향, intensity는 크기를 나타낸다.</p>
+            </div>
+            <div class="panel pad">
+              <h3>발표 해석</h3>
+              <p class="muted" style="margin-top: 12px;">특정 영역에서 색과 궤적이 일관되게 남는다는 것은 foreground mask와 이후 tracking 입력이 장시간 안정적으로 유지되었다는 증거다.</p>
+            </div>
+            <div class="band"><p class="callout">핵심은 최고 정확도 경쟁보다, 실외 장면에서 오래 버티는 시스템성이다.</p></div>
+          </div>
+        </div>
+        <aside class="speaker-notes">Figure 3은 장시간 운용의 증거입니다. 같은 경로에서 비슷한 방향과 크기의 track이 일관되게 누적된다는 점을 보여주며, 배경 모델이 tracker에 안정적인 입력을 제공했다는 주장으로 이어집니다.</aside>
+      </section>
+
+      <section class="slide" data-title="Figure 4">
+        <div class="content">
+          <div class="eyebrow">Figure 4</div>
+          <h2>사람/차량 분류보다 중요한 것은 connected region의 안정성이다</h2>
+          <div class="figure-box" style="height: 270px; margin-top: 28px;">
+            <img class="paper-figure" src="Figure 4.png" alt="Figure 4: objects classified as people or cars using aspect ratio heuristics">
+          </div>
+          <div class="grid cols-3" style="margin-top: 28px;">
+            <div class="panel pad"><h3>(a) People</h3><p class="muted" style="margin-top: 10px;">aspect ratio 같은 단순 heuristic으로 사람 후보를 분류한다.</p></div>
+            <div class="panel pad"><h3>(b) Cars</h3><p class="muted" style="margin-top: 10px;">차량 후보도 같은 방식의 연결 영역 특징으로 분류한다.</p></div>
+            <div class="panel pad"><h3>발표 해석</h3><p class="muted" style="margin-top: 10px;">분류기의 정교함보다, foreground region이 안정적으로 나온다는 점을 보여주는 보조 증거다.</p></div>
+          </div>
+        </div>
+        <aside class="speaker-notes">Figure 4는 사람과 차량 분류가 핵심 성과라는 의미보다, connected component가 일정한 형태로 나와서 단순 heuristic도 어느 정도 작동했다는 의미로 읽는 편이 정확합니다.</aside>
+      </section>
+
+      <section class="slide" data-title="실패 사례">
+        <div class="content">
+          <div class="eyebrow">Failure Cases</div>
+          <h2>실패는 background model과 tracking boundary에서 드러난다</h2>
+          <div class="grid cols-3" style="margin-top: 42px;">
+            <div class="panel pad">
+              <span class="tag rust">급격한 조명</span>
+              <h3 style="margin-top: 20px;">빠른 구름 변화</h3>
+              <p class="muted" style="margin-top: 14px;">alpha보다 빠르게 장면이 바뀌면 저장된 component가 현재 값을 설명하지 못한다. 논문은 대체로 10~20초 안에 안정화된다고 보고한다.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag rust">겹침</span>
+              <h3 style="margin-top: 20px;">두 사람이 붙어 걷는 경우</h3>
+              <p class="muted" style="margin-top: 14px;">foreground mask가 하나의 connected component로 합쳐지면 tracker가 객체를 분리하기 어렵다.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag rust">교차</span>
+              <h3 style="margin-top: 20px;">차량 입출차가 같은 지점에서 겹침</h3>
+              <p class="muted" style="margin-top: 14px;">한 차량이 나가고 다른 차량이 들어오는 경우 같은 객체로 이어질 수 있다.</p>
+            </div>
+          </div>
+          <div class="band" style="margin-top: 44px;"><p class="callout">배경 제거가 안정되어도, 객체 구분과 identity 유지는 별도의 tracking 문제가 남는다.</p></div>
+        </div>
+        <aside class="speaker-notes">실패 사례를 통해 이 논문의 한계를 정확히 분리해야 합니다. 배경 모델의 한계도 있고, connected component와 tracking 단계의 한계도 있습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="한계">
+        <div class="content">
+          <div class="eyebrow">Limitations</div>
+          <h2>픽셀 통계만으로는 부족한 것들</h2>
+          <div class="grid cols-3" style="margin-top: 38px;">
+            <div class="panel pad"><h3>픽셀 독립</h3><p class="muted" style="margin-top: 12px;">주변 구조, 경계, 물체 형태를 직접 보지 않는다.</p></div>
+            <div class="panel pad"><h3>색 모델 단순화</h3><p class="muted" style="margin-top: 12px;">계산량 때문에 full covariance 대신 sigma²I를 사용한다.</p></div>
+            <div class="panel pad"><h3>그림자</h3><p class="muted" style="margin-top: 12px;">명시적 shadow removal이 아니라, 응용에 따라 함께 추적될 수 있다.</p></div>
+            <div class="panel pad"><h3>정지 전경</h3><p class="muted" style="margin-top: 12px;">충분히 오래 멈추면 배경으로 편입될 수 있다.</p></div>
+            <div class="panel pad"><h3>객체 겹침</h3><p class="muted" style="margin-top: 12px;">mask가 합쳐지면 tracker가 identity를 혼동한다.</p></div>
+            <div class="panel pad"><h3>검증 방식</h3><p class="muted" style="margin-top: 12px;">현대 기준의 공개 benchmark와 ablation은 부족하다.</p></div>
+          </div>
+          <div class="band" style="margin-top: 34px;"><p class="callout">의미를 이해하는 모델이 아니라, 픽셀 색 통계로 현실 배경을 견디는 모델이다.</p></div>
+        </div>
+        <aside class="speaker-notes">한계를 말할 때 “오래된 방법이라 부족하다”로 끝내지 말고, 어떤 가정 때문에 어떤 실패가 생기는지 연결하는 것이 중요합니다.</aside>
+      </section>
+
+      <section class="slide" data-title="현대적 계보">
+        <div class="content">
+          <div class="eyebrow">Legacy</div>
+          <h2>이후 연구는 같은 문제를 다른 가정으로 계속 풀었다</h2>
+          <div class="grid cols-4" style="margin-top: 42px;">
+            <div class="panel pad">
+              <span class="tag teal">GMM 개선</span>
+              <h3 style="margin-top: 20px;">MOG2 계열</h3>
+              <p class="muted" style="margin-top: 12px;">component 수, learning rate, shadow handling, 계산량 제어 개선.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag gold">Sample-based</span>
+              <h3 style="margin-top: 20px;">비모수 모델</h3>
+              <p class="muted" style="margin-top: 12px;">Gaussian 모양을 가정하지 않고 과거 샘플 집합과 비교.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag blue">Robust PCA</span>
+              <h3 style="margin-top: 20px;">저랭크 + 희소</h3>
+              <p class="muted" style="margin-top: 12px;">배경은 반복 구조, 전경은 드문 변화로 분해.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag rust">Deep Segmentation</span>
+              <h3 style="margin-top: 20px;">문맥과 의미</h3>
+              <p class="muted" style="margin-top: 12px;">픽셀 색 통계를 넘어 주변 문맥, 형태, semantic 정보를 활용.</p>
+            </div>
+          </div>
+          <div class="band" style="margin-top: 44px;"><p class="callout">이 논문은 최종 해법보다, background subtraction을 online background modeling 문제로 만든 기준점이다.</p></div>
+        </div>
+        <aside class="speaker-notes">현대 딥러닝과 비교하면 단순하지만, 문제의 기본 언어는 여기서 분명해졌습니다. 배경은 시간적으로 학습되는 모델이고, 같은 픽셀에도 여러 정상 상태가 있을 수 있습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="내 연구와의 연결">
+        <div class="content">
+          <div class="eyebrow">Research Connection</div>
+          <h2>내 연구의 접점은 GMM의 “시간적 배경 설명”이다</h2>
+          <div class="grid cols-3" style="margin-top: 38px;">
+            <div class="panel pad">
+              <span class="tag teal">논문 원리</span>
+              <h3 style="margin-top: 20px;">픽셀 변화가 배경 모드로 설명되는가</h3>
+              <p class="muted" style="margin-top: 14px;">한 픽셀의 시간 이력을 여러 Gaussian component로 묶고, 현재 관측값이 반복된 배경 변화 안에 들어가는지 본다.</p>
+              <p class="teal" style="margin-top: 18px; font-weight: 800;">설명되면 정상 배경 변화, 설명되지 않으면 전경 후보가 된다.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag gold">코드에서의 사용</span>
+              <h3 style="margin-top: 20px;">네 시간 스케일로 변화 성격을 나눈다</h3>
+              <p class="muted" style="margin-top: 14px;">최신 실험은 MOG2를 fast, mid, smid, slow 네 채널로 돌리고 채널 간 합의를 계산한다.</p>
+              <p class="gold" style="margin-top: 18px; font-weight: 800;">fast-only는 순간 노이즈, mid+smid는 국소 움직임, smid+slow는 지속 변화로 읽는다.</p>
+            </div>
+            <div class="panel pad">
+              <span class="tag blue">연구 목적에 맞춘 변형</span>
+              <h3 style="margin-top: 20px;">전경 mask를 최종 판단으로 쓰지 않는다</h3>
+              <p class="muted" style="margin-top: 14px;">논문은 background subtraction 자체가 중심이지만, 내 연구에서는 GMM 출력을 변화 신호 정제 단계로 제한한다.</p>
+              <p class="blue" style="margin-top: 18px; font-weight: 800;">조도, 그림자, 반사처럼 배경이 설명할 수 있는 변화는 먼저 억제한다.</p>
+            </div>
+          </div>
+          <div class="band" style="margin-top: 40px;">
+            <p class="callout">따라서 교차점은 GMM이 최종 답이라는 점이 아니라, 변화가 시간적으로 학습된 배경 모드로 설명되는지 먼저 묻는다는 점이다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">내 연구와의 접점은 연구 전체의 목표가 같다는 뜻이 아닙니다. 코드에서 확인되는 GMM 사용부만 떼어 보면, 최신 실험은 cv2 MOG2를 fast, mid, smid, slow 네 시간 스케일로 운용합니다. fast만 튀면 순간 조도, 그림자, 반사 같은 배경성 노이즈 가능성을 먼저 보고, mid와 smid가 함께 반응하면 더 안정적인 국소 움직임으로 봅니다. smid와 slow가 함께 반응하면 지속 변화나 정지 구조의 가능성을 따로 둡니다. 이 구조가 논문과 맞물리는 지점은 픽셀 변화 자체를 곧장 의미 있는 전경으로 보지 않고, 시간적으로 학습된 배경 모드가 설명할 수 있는 변화인지 먼저 묻는다는 점입니다. 다만 논문은 foreground mask 생성이 중심 목표이고, 내 연구에서는 그 mask를 최종 판단으로 쓰지 않고 이후 단계가 볼 변화 신호를 정제하는 도구로 제한합니다.</aside>
+      </section>
+
+      <section class="slide" data-title="예상 질문">
+        <div class="content">
+          <div class="eyebrow">Expected Questions</div>
+          <h2>질문이 들어오기 쉬운 지점</h2>
+          <div class="grid cols-2" style="margin-top: 36px;">
+            <div class="panel pad"><h3>왜 단일 Gaussian이 아니라 mixture인가?</h3><p class="muted" style="margin-top: 10px;">물결, 그림자, 반사, 나뭇잎처럼 한 픽셀이 여러 정상 상태를 반복할 수 있기 때문이다.</p></div>
+            <div class="panel pad"><h3>왜 w / sigma로 정렬하는가?</h3><p class="muted" style="margin-top: 10px;">자주 보였는지와 안정적으로 모였는지를 동시에 반영하려는 heuristic이다.</p></div>
+            <div class="panel pad"><h3>정지한 전경 물체는 어떻게 되는가?</h3><p class="muted" style="margin-top: 10px;">충분히 오래 정지하면 새 Gaussian의 weight가 커지고 배경으로 편입될 수 있다.</p></div>
+            <div class="panel pad"><h3>그림자는 어떻게 처리하는가?</h3><p class="muted" style="margin-top: 10px;">명시적으로 제거하지 않는다. 자주 나타나면 배경 모드가 될 수 있고, 그렇지 않으면 전경으로 잡힌다.</p></div>
+          </div>
+        </div>
+        <aside class="speaker-notes">Q&A 대비 슬라이드는 발표 중에는 빠르게 넘기거나 appendix처럼 사용할 수 있습니다. 하지만 세미나에서 나올 가능성이 높은 질문을 미리 정리해 두면 좋습니다.</aside>
+      </section>
+
+      <section class="slide" data-title="최종 정리">
+        <div class="content">
+          <div class="eyebrow">Takeaway</div>
+          <h2>이 논문이 남긴 세 가지 언어</h2>
+          <div class="grid cols-3" style="margin-top: 46px;">
+            <div class="panel pad"><span class="step-no">1</span><h3 style="margin-top: 22px;">배경은 이미지가 아니라 모델이다</h3><p class="muted" style="margin-top: 14px;">고정된 기준 프레임이 아니라 시간에 따라 갱신되는 상태.</p></div>
+            <div class="panel pad"><span class="step-no">2</span><h3 style="margin-top: 22px;">한 픽셀에도 여러 정상 상태가 있다</h3><p class="muted" style="margin-top: 14px;">반복 배경과 조명 변화를 다봉 분포로 표현.</p></div>
+            <div class="panel pad"><span class="step-no">3</span><h3 style="margin-top: 22px;">판단과 학습은 동시에 일어난다</h3><p class="muted" style="margin-top: 14px;">현재 프레임 분류가 다음 프레임의 배경 기억을 바꾼다.</p></div>
+          </div>
+          <div class="band" style="margin-top: 50px;">
+            <p class="callout">강점은 단순하지만 실시간 장기 운용에 맞춘 구조이고, 한계는 그 단순함이 의미와 형태를 보지 못한다는 데 있다.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">마무리에서는 “고전이지만 아직 설명 가치가 있는 이유”를 말하면 됩니다. 현대 방법은 더 풍부한 문맥과 의미를 쓰지만, 배경을 시간적으로 모델링한다는 문제의식은 계속 이어집니다.</aside>
+      </section>
+    </div>
+  </div>
+
+  <div class="hint">← / → 이동, N 발표자 노트</div>
+  <div class="counter" id="counter">1 / 29</div>
+  <div class="notes" id="notes"></div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const stage = document.getElementById("stage");
+    const counter = document.getElementById("counter");
+    const notes = document.getElementById("notes");
+    let current = 0;
+    let notesVisible = false;
+    counter.textContent = `1 / ${slides.length}`;
+
+    function scaleStage() {
+      const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+      stage.style.transform = `scale(${scale})`;
+    }
+
+    function updateNotes() {
+      const note = slides[current].querySelector(".speaker-notes");
+      notes.textContent = note ? note.textContent : "";
+      notes.classList.toggle("visible", notesVisible && notes.textContent.length > 0);
+    }
+
+    function showSlide(index) {
+      const next = Math.max(0, Math.min(index, slides.length - 1));
+      if (next === current) {
+        return;
+      }
+      slides[current].classList.remove("active");
+      current = next;
+      slides[current].classList.add("active");
+      counter.textContent = `${current + 1} / ${slides.length}`;
+      updateNotes();
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "ArrowDown" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        showSlide(current + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp" || event.key === "PageUp") {
+        event.preventDefault();
+        showSlide(current - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        showSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        showSlide(slides.length - 1);
+      }
+      if (event.key.toLowerCase() === "n") {
+        notesVisible = !notesVisible;
+        updateNotes();
+      }
+    });
+
+    const requestedSlide = Number(new URLSearchParams(window.location.search).get("slide"));
+    if (Number.isFinite(requestedSlide) && requestedSlide >= 1 && requestedSlide <= slides.length) {
+      slides[current].classList.remove("active");
+      current = requestedSlide - 1;
+      slides[current].classList.add("active");
+      counter.textContent = `${current + 1} / ${slides.length}`;
+    }
+
+    window.addEventListener("resize", scaleStage);
+    scaleStage();
+    updateNotes();
+  </script>
+</body>
+</html>

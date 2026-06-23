@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-label="Background mixture model processing pipeline">
+  <defs>
+    <marker id="arr" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#294a55"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="500" fill="#f7f4ef"/>
+  <text x="52" y="58" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="30" font-weight="700" fill="#1d2b2f">해결법의 처리 흐름</text>
+  <text x="52" y="92" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="17" fill="#4b5a60">매 프레임에서 분류와 학습이 동시에 일어난다. 이것이 장기 운용을 가능하게 한 핵심이다.</text>
+
+  <g font-family="Arial, 'Malgun Gothic', sans-serif">
+    <rect x="55" y="165" width="155" height="135" rx="8" fill="#ffffff" stroke="#d6c8ad"/>
+    <text x="82" y="205" font-size="18" font-weight="700" fill="#253339">현재 프레임</text>
+    <rect x="93" y="226" width="78" height="52" fill="#dae6eb" stroke="#7e98a3"/>
+    <circle cx="128" cy="251" r="15" fill="#8a5c44"/>
+
+    <line x1="220" y1="232" x2="285" y2="232" stroke="#294a55" stroke-width="3" marker-end="url(#arr)"/>
+
+    <rect x="300" y="145" width="180" height="175" rx="8" fill="#ffffff" stroke="#d6c8ad"/>
+    <text x="326" y="184" font-size="18" font-weight="700" fill="#253339">픽셀별 기억</text>
+    <text x="324" y="216" font-size="14" fill="#52646b">최근 색값을 여러 후보로 보관</text>
+    <circle cx="352" cy="258" r="17" fill="#6fae9b" opacity="0.9"/>
+    <circle cx="397" cy="240" r="17" fill="#d8a24b" opacity="0.9"/>
+    <circle cx="430" cy="276" r="17" fill="#b45b4b" opacity="0.9"/>
+    <text x="329" y="306" font-size="13" fill="#52646b">Gaussian components</text>
+
+    <line x1="492" y1="232" x2="557" y2="232" stroke="#294a55" stroke-width="3" marker-end="url(#arr)"/>
+
+    <rect x="575" y="145" width="190" height="175" rx="8" fill="#ffffff" stroke="#d6c8ad"/>
+    <text x="604" y="184" font-size="18" font-weight="700" fill="#253339">배경 후보 선택</text>
+    <text x="601" y="216" font-size="14" fill="#52646b">자주 보이고 안정적인 후보</text>
+    <rect x="617" y="245" width="102" height="26" rx="4" fill="#e6f1ee"/>
+    <text x="632" y="264" font-size="13" fill="#2f7568">high w / low σ</text>
+    <rect x="617" y="280" width="102" height="26" rx="4" fill="#f3ded8"/>
+    <text x="640" y="299" font-size="13" fill="#9b3e35">foreground?</text>
+
+    <line x1="777" y1="232" x2="842" y2="232" stroke="#294a55" stroke-width="3" marker-end="url(#arr)"/>
+
+    <rect x="860" y="145" width="165" height="175" rx="8" fill="#ffffff" stroke="#d6c8ad"/>
+    <text x="898" y="184" font-size="18" font-weight="700" fill="#253339">전경 마스크</text>
+    <rect x="902" y="222" width="82" height="70" fill="#273238"/>
+    <circle cx="945" cy="257" r="22" fill="#ffffff"/>
+    <text x="891" y="318" font-size="13" fill="#52646b">움직이는 영역만 남김</text>
+
+    <line x1="1037" y1="232" x2="1100" y2="232" stroke="#294a55" stroke-width="3" marker-end="url(#arr)"/>
+
+    <rect x="1110" y="145" width="55" height="175" rx="8" fill="#ffffff" stroke="#d6c8ad"/>
+    <text x="1124" y="192" font-size="15" font-weight="700" fill="#253339">추적</text>
+    <text x="1123" y="222" font-size="12" fill="#52646b">영역</text>
+    <text x="1123" y="244" font-size="12" fill="#52646b">연결</text>
+    <text x="1123" y="266" font-size="12" fill="#52646b">Kalman</text>
+  </g>
+
+  <rect x="55" y="370" width="1090" height="72" rx="8" fill="#1f2f35"/>
+  <text x="82" y="400" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="17" font-weight="700" fill="#ffffff">발표용 핵심 문장</text>
+  <text x="82" y="425" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="16" fill="#d9e8e4">이 알고리즘은 '현재 프레임을 배경과 비교'하는 동시에, 그 비교 결과로 '다음 프레임의 배경 기억'을 갱신한다.</text>
+</svg>

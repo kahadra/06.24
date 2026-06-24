@@ -261,7 +261,6 @@
 
     .equation {
       font-family: Consolas, "Courier New", monospace;
-      white-space: pre-wrap;
       background: #18262c;
       color: #f7fbfb;
       border-radius: 8px;
@@ -269,6 +268,46 @@
       padding: 22px;
       font-size: 21px;
       line-height: 1.5;
+    }
+
+    .eq-line {
+      display: block;
+    }
+
+    .eq-line + .eq-line {
+      margin-top: 18px;
+    }
+
+    .eq-note {
+      color: #d7e5e2;
+      display: block;
+      font-size: 0.92em;
+      margin-top: 10px;
+    }
+
+    .equation sub,
+    .equation sup {
+      font-size: 0.68em;
+      line-height: 0;
+    }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.05;
+      margin: 0 0.12em;
+      vertical-align: middle;
+    }
+
+    .frac > span:first-child {
+      border-bottom: 1px solid currentColor;
+      padding: 0 0.18em 0.12em;
+    }
+
+    .frac > span:last-child {
+      padding-top: 0.12em;
     }
 
     .small-equation {
@@ -657,7 +696,7 @@
       <section class="slide" data-title="발표 로드맵">
         <div class="content">
           <div class="eyebrow">Roadmap</div>
-          <h2>오늘 발표는 문제 정의보다 “모델이 실제로 어떻게 굴러가는가”에 무게를 둔다</h2>
+          <h2>오늘 발표 순서</h2>
           <div class="grid cols-4" style="margin-top: 42px;">
             <div class="panel step"><span class="step-no">1</span><div><div class="step-title">문제 재정의</div><div class="step-desc">배경은 왜 고정 이미지가 아닌가</div></div></div>
             <div class="panel step"><span class="step-no">2</span><div><div class="step-title">GMM 모델</div><div class="step-desc">한 픽셀의 여러 정상 상태를 어떻게 저장하는가</div></div></div>
@@ -797,7 +836,9 @@
           <div>
             <div class="eyebrow">Pixel History</div>
             <h2>픽셀 하나를 독립적인 작은 관찰자로 본다</h2>
-            <div class="equation" style="margin-top: 34px;">{X1, ..., Xt} = { I(x0, y0, i) : 1 <= i <= t }</div>
+            <div class="equation" style="margin-top: 34px;">
+              <span class="eq-line">{X<sub>1</sub>, ..., X<sub>t</sub>} = { I(x<sub>0</sub>, y<sub>0</sub>, i) : 1 &le; i &le; t }</span>
+            </div>
             <div class="grid cols-2" style="margin-top: 28px;">
               <div class="panel pad"><h3>관측값</h3><p class="muted" style="margin-top: 10px;">매 프레임에서 같은 좌표의 RGB 값</p></div>
               <div class="panel pad"><h3>학습 대상</h3><p class="muted" style="margin-top: 10px;">그 픽셀이 반복해서 보이는 정상 상태들</p></div>
@@ -842,16 +883,19 @@
           <h2>현재 픽셀값의 확률을 K개의 Gaussian mixture로 본다</h2>
           <div class="grid split-7-5" style="margin-top: 36px;">
             <div>
-              <div class="equation">P(Xt) = sum_i=1^K w_i,t * eta(Xt, mu_i,t, Sigma_i,t)
-
-Sigma_k,t = sigma_k,t^2 * I</div>
-              <div class="band" style="margin-top: 24px;"><p class="callout">모든 픽셀이 자기만의 작은 mixture model을 가진다.</p></div>
+              <div class="equation">
+                <span class="eq-line">P(X<sub>t</sub>) = &sum;<sub>i=1</sub><sup>K</sup> w<sub>i,t</sub> &eta;(X<sub>t</sub>, &mu;<sub>i,t</sub>, &Sigma;<sub>i,t</sub>)</span>
+                <span class="eq-line">&Sigma;<sub>k,t</sub> = &sigma;<sub>k,t</sub><sup>2</sup> I</span>
+              </div>
+              <div class="band" style="margin-top: 24px;"><p class="callout">각 픽셀은 자기만의 mixture model을 가진다.</p></div>
             </div>
             <div class="grid cols-2">
-              <div class="panel pad"><h3>K</h3><p class="muted" style="margin-top: 10px;">기억할 후보 수. 논문은 메모리와 계산량에 따라 보통 3~5를 사용한다고 설명한다.</p></div>
-              <div class="panel pad"><h3>w</h3><p class="muted" style="margin-top: 10px;">해당 상태가 얼마나 자주 관측되었는가.</p></div>
-              <div class="panel pad"><h3>mu</h3><p class="muted" style="margin-top: 10px;">색 덩어리의 중심값.</p></div>
-              <div class="panel pad"><h3>sigma</h3><p class="muted" style="margin-top: 10px;">그 색 덩어리가 얼마나 흔들리는가.</p></div>
+              <div class="panel pad"><h3>K</h3><p class="muted" style="margin-top: 10px;">한 픽셀이 기억하는 Gaussian 후보 개수.</p></div>
+              <div class="panel pad"><h3>w<sub>i,t</sub></h3><p class="muted" style="margin-top: 10px;">i번째 후보가 얼마나 자주 관측되었는가.</p></div>
+              <div class="panel pad"><h3>&eta;(&middot;)</h3><p class="muted" style="margin-top: 10px;">현재 값이 해당 Gaussian에서 나올 그럴듯함.</p></div>
+              <div class="panel pad"><h3>&mu;<sub>i,t</sub></h3><p class="muted" style="margin-top: 10px;">i번째 색 덩어리의 중심값.</p></div>
+              <div class="panel pad"><h3>&Sigma;<sub>i,t</sub></h3><p class="muted" style="margin-top: 10px;">색 덩어리의 퍼짐을 나타내는 공분산.</p></div>
+              <div class="panel pad"><h3>&sigma;<sub>i,t</sub></h3><p class="muted" style="margin-top: 10px;">논문이 실시간 처리를 위해 쓰는 단순화된 흔들림 폭.</p></div>
             </div>
           </div>
         </div>
@@ -884,9 +928,10 @@ Sigma_k,t = sigma_k,t^2 * I</div>
           <div>
             <div class="eyebrow">Step 1. Match Criterion</div>
             <h2>저장된 Gaussian 중 하나와 충분히 가까운가</h2>
-            <div class="equation" style="margin-top: 34px;">match k if
-
-distance(Xt, mu_k,t-1) <= 2.5 * sigma_k,t-1</div>
+            <div class="equation" style="margin-top: 34px;">
+              <span class="eq-line">match k if</span>
+              <span class="eq-line">distance(X<sub>t</sub>, &mu;<sub>k,t-1</sub>) &le; 2.5&sigma;<sub>k,t-1</sub></span>
+            </div>
             <div class="band" style="margin-top: 28px;"><p class="callout">전역 threshold가 아니라 component별 local threshold다.</p></div>
           </div>
           <div class="panel pad">
@@ -910,10 +955,11 @@ distance(Xt, mu_k,t-1) <= 2.5 * sigma_k,t-1</div>
           <h2>자주 match되는 component는 올라가고, 나머지는 내려간다</h2>
           <div class="grid split-7-5" style="margin-top: 34px;">
             <div>
-              <div class="equation">w_k,t = (1 - alpha) * w_k,t-1 + alpha * M_k,t
-
-M_k,t = 1 if component k matches Xt
-M_k,t = 0 otherwise</div>
+              <div class="equation">
+                <span class="eq-line">w<sub>k,t</sub> = (1 - &alpha;)w<sub>k,t-1</sub> + &alpha;M<sub>k,t</sub></span>
+                <span class="eq-line">M<sub>k,t</sub> = 1 if component k matches X<sub>t</sub></span>
+                <span class="eq-line">M<sub>k,t</sub> = 0 otherwise</span>
+              </div>
               <div class="band" style="margin-top: 26px;"><p class="callout">1 / alpha는 기억의 시간 상수처럼 작동한다.</p></div>
             </div>
             <div class="panel pad">
@@ -935,12 +981,11 @@ M_k,t = 0 otherwise</div>
           <div class="eyebrow">Step 3. Mean / Variance Update</div>
           <h2>match된 Gaussian만 중심과 폭을 현재 관측값 쪽으로 조금 이동한다</h2>
           <div class="grid split-7-5" style="margin-top: 34px;">
-            <div class="equation small-equation">rho = alpha * eta(Xt | mu_k, sigma_k)
-
-mu_k,t = (1 - rho) * mu_k,t-1 + rho * Xt
-
-sigma_k,t^2 = (1 - rho) * sigma_k,t-1^2
-              + rho * (Xt - mu_k,t)^T (Xt - mu_k,t)</div>
+            <div class="equation small-equation">
+              <span class="eq-line">&rho; = &alpha;&eta;(X<sub>t</sub> | &mu;<sub>k</sub>, &sigma;<sub>k</sub>)</span>
+              <span class="eq-line">&mu;<sub>k,t</sub> = (1 - &rho;)&mu;<sub>k,t-1</sub> + &rho;X<sub>t</sub></span>
+              <span class="eq-line">&sigma;<sub>k,t</sub><sup>2</sup> = (1 - &rho;)&sigma;<sub>k,t-1</sub><sup>2</sup> + &rho;(X<sub>t</sub> - &mu;<sub>k,t</sub>)<sup>T</sup>(X<sub>t</sub> - &mu;<sub>k,t</sub>)</span>
+            </div>
             <div>
               <div class="panel pad"><h3>mu 업데이트</h3><p class="muted" style="margin-top: 10px;">새 값이 중심 근처에서 반복되면 평균이 서서히 이동한다.</p></div>
               <div class="panel pad" style="margin-top: 18px;"><h3>sigma 업데이트</h3><p class="muted" style="margin-top: 10px;">값이 넓게 퍼지면 허용 폭이 커지고, 좁게 모이면 안정적인 component가 된다.</p></div>
@@ -991,8 +1036,10 @@ sigma_k,t^2 = (1 - rho) * sigma_k,t-1^2
               <div class="bar-row"><div class="bar-name">Component B</div><div class="bar-track"><div class="bar-fill gold-bg" style="width: 72%;"></div></div><div class="muted">중간</div></div>
               <div class="bar-row"><div class="bar-name">Component C</div><div class="bar-track"><div class="bar-fill blue-bg" style="width: 48%;"></div></div><div class="muted">낮음</div></div>
               <div class="bar-row"><div class="bar-name">Component D</div><div class="bar-track"><div class="bar-fill rust-bg" style="width: 28%;"></div></div><div class="muted">전경 후보</div></div>
-              <div class="equation small-equation" style="margin-top: 28px;">score_k = w_k / sigma_k
-B = argmin_b (sum_k=1^b w_k > T)</div>
+              <div class="equation small-equation" style="margin-top: 28px;">
+                <span class="eq-line">score<sub>k</sub> = <span class="frac"><span>w<sub>k</sub></span><span>&sigma;<sub>k</sub></span></span></span>
+                <span class="eq-line">B = arg min<sub>b</sub>(&sum;<sub>k=1</sub><sup>b</sup> w<sub>k</sub> &gt; T)</span>
+              </div>
             </div>
             <div class="panel pad">
               <h3>w / sigma의 해석</h3>
